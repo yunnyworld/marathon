@@ -1,64 +1,41 @@
 #include <stdio.h>
-#include <stdlib.h> //malloc(memory allocation)함수 사용
+#include <stdlib.h>
 
-#include "calc.h"
-//#include "userinput.h"
+#include "user.h"
 
-#define DEFAULT_FILE "marathon_v1.txt"
+#define DEFAULT_FILE "user.txt"
 
-int main( int argc, char* argv[])
+int main(int argc, char* argv[])
 {
-  int number;
-	person *p;
+  	int number = 0, ret = 0;
+	char *datafile = NULL;
+	user *p = NULL;
 
-  char* datafile;
+	// Read a filename
+	if(argc == 1) {
+		datafile = DEFAULT_FILE;
+	} else if (argc == 2) {
+		datafile = argv[1];
+	} else {
+		printf("Usage : %s datafile\n", argv[0]);
+		exit(-1);
+	}
 
-  if(argc == 1)
-  {
-    datafile = DEFAULT_FILE;
-  } else if(argc == 2)
-  {
-    datafile = argv[1];
-  } else if(argc>2)
-  {
-    printf("Usage : ./marathon datafile\n");
-    exit(1);
-  }
+	// Load data from the file
+	ret = user_create(datafile, &p, &number);
+  	if( ret != 0 ) {
+		printf("user_create() returns error! %d\n", ret);
+		exit(ret);
+	}
 
-  user_create(datafile, &p, &number);
+	// Display some statistic data
+	ret = user_stat(p, number);
+	if( ret != 0 ) {
+		printf("user_stat returns() error (errno: %d)\n", ret);
+	}
 
-	double avg;
-	avg = calc_average(p, number);
-	printf("Average is %.2f\n", calc_average(p, number));
-
-	// 최소값을 갖는 사람의 변수를 first_person  선언
-	person* first_person;
-	// 최소값을 갖는 사람을 구하는 함수를 호출, return 값(person 구조체)을 first_person 에 저장
-	first_person = calc_first(p, number);
-	// first_person->name은 first_person.name과 다르게 구조체를 가리키는 의미가 아닌 구조체의 주소값을 가르키는 의미를 뜻함으로써 메모리 절약 가능
-	// ( ~~ )?" true " false " - 괄호 안이 참이면 true칸 실행 아니면 false칸 실행
-	printf("first person is %s. %s record is %.2f.\n", first_person->name, (first_person->gender == 'm')?"he's":"she's" ,first_person->record);
-
-	double _rate;
-	_rate = calc_rate(p, number, "e");
-	printf("Rate of e from total is %.2f%%\n", _rate); //double형은 lf로 받음
-
-	//person* dec_gen;
-	//int dec_gen_f;
-	//ret = decgen(p, number, 'm');
-	calc_decgen(p, number, 'f');
-
-  calc_decage(p, number, -20, -30);
-
-	//int dec_hei_160_170;
-	calc_dechei(p, number, 160, 170);
-
-	//int dec_wei_70_80;
-	calc_decwei(p, number, 70, 80);
-
-  user_close();
-
-	//fclose(file); //끝나기 전 항상 파일 닫기
+	// Close the file data
+	user_close();
 
 	return 0;
 }
